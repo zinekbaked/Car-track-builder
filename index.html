@@ -42,6 +42,36 @@
     </div>
   </section>
 
+  <section id="editorView" class="view hidden">
+    <div class="card">
+      <div class="row space">
+        <div>
+          <h2>Editor</h2>
+          <div class="small">Aktuální mapa: <b id="currentName">---</b></div>
+        </div>
+        <button id="btnBack">Zpět do menu</button>
+      </div>
+
+      <div class="toolbar">
+        <span class="small">Vybraný štětec:</span>
+        <b id="brushName">Tráva</b>
+
+        <div class="row">
+          <button class="brush" data-tile="0">Tráva</button>
+          <button class="brush" data-tile="1">Cesta</button>
+          <button class="brush" data-tile="2">Voda</button>
+        </div>
+      </div>
+
+      <div id="grid" class="grid"></div>
+
+      <div class="row space">
+        <button id="btnSave">Uložit</button>
+        <button id="btnClear" class="danger">Vymazat mapu</button>
+      </div>
+    </div>
+  </section>
+
 
   <script src="script.js"></script>
 </body>
