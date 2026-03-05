@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Track Builder</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Car Track Builder</h1>
+    <div id="viewHint" class="hint">Menu</div>
+  </header>
+
+  <section id="menuView" class="view">
+    <div class="card">
+      <h2>Hlavní menu</h2>
+
+      <div class="row">
+        <button id="btnNew">Nová mapa</button>
+      </div>
+
+      <div class="row">
+        <label for="savedSelect">Uložené mapy:</label>
+        <select id="savedSelect"></select>
+      </div>
+
+      <div class="row">
+        <button id="btnLoad">Načíst</button>
+        <button id="btnDelete" class="danger">Smazat</button>
+      </div>
+
+      <hr>
+
+      <h3>Export / Import</h3>
+      <div class="row">
+        <button id="btnExport">Export vybrané</button>
+        <button id="btnImport">Import</button>
+      </div>
+
+      <textarea id="ioArea" placeholder="JSON import"></textarea>
+    </div>
+  </section>
+
+
+  <script src="script.js"></script>
+</body>
+</html>
