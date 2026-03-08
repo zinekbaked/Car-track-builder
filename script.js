@@ -1,10 +1,11 @@
 const SIZE = 20;
 const TILE_CLASSES = ["grass", "road", "water"];
 const TILE_NAMES = ["Tráva", "Cesta", "Voda"];
+const STORAGE_KEY = "ctb_maps";
 
 let currentMapName = null;
 let mapData = createEmptyMap();
-let selectedTile = 0; 
+let selectedTile = 0;
 
 const menuView = document.getElementById("menuView");
 const editorView = document.getElementById("editorView");
@@ -13,18 +14,22 @@ const viewHint = document.getElementById("viewHint");
 const gridEl = document.getElementById("grid");
 const currentNameEl = document.getElementById("currentName");
 
+const savedSelect = document.getElementById("savedSelect");
+const ioArea = document.getElementById("ioArea");
+
 const brushNameEl = document.getElementById("brushName");
 const brushButtons = document.querySelectorAll(".brush");
 
 document.getElementById("btnNew").addEventListener("click", newMap);
-document.getElementById("btnBack").addEventListener("click", showMenu);
-document.getElementById("btnClear").addEventListener("click", clearCurrent);
+document.getElementById("btnLoad").addEventListener("click", loadSelected);
+document.getElementById("btnDelete").addEventListener("click", deleteSelected);
 
-document.getElementById("btnSave").addEventListener("click", () => alert("Ukládání bude až potom"));
-document.getElementById("btnLoad").addEventListener("click", () => alert("Načítání bude až potom"));
-document.getElementById("btnDelete").addEventListener("click", () => alert("Mazání bude až potom"));
-document.getElementById("btnExport").addEventListener("click", () => alert("Export bude až potom"));
-document.getElementById("btnImport").addEventListener("click", () => alert("Import bude až potom"));
+document.getElementById("btnExport").addEventListener("click", exportSelected);
+document.getElementById("btnImport").addEventListener("click", importFromTextarea);
+
+document.getElementById("btnBack").addEventListener("click", showMenu);
+document.getElementById("btnSave").addEventListener("click", saveCurrent);
+document.getElementById("btnClear").addEventListener("click", clearCurrent);
 
 brushButtons.forEach(btn => {
   btn.addEventListener("click", () => {
@@ -33,6 +38,7 @@ brushButtons.forEach(btn => {
   });
 });
 
+refreshSavedSelect();
 buildGrid();
 renderGrid();
 showMenu();
@@ -91,6 +97,7 @@ function showMenu() {
   menuView.classList.remove("hidden");
   editorView.classList.add("hidden");
   viewHint.textContent = "Menu";
+  refreshSavedSelect();
 }
 
 function showEditor() {
@@ -111,7 +118,106 @@ function newMap() {
 }
 
 function clearCurrent() {
-  if (!confirm("Opravdu vymazat celou mapu?")) return;
+  if (!confirm("Opravdu vymazat celou mapu")) return;
   mapData = createEmptyMap();
   renderGrid();
+}
+
+function getAllMaps() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return {};
+  return JSON.parse(raw);
+}
+
+function setAllMaps(mapsObj) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(mapsObj));
+}
+
+function refreshSavedSelect() {
+  const maps = getAllMaps();
+  const names = Object.keys(maps);
+
+  savedSelect.innerHTML = "";
+  if (names.length === 0) {
+    const opt = document.createElement("option");
+    opt.value = "";
+    opt.textContent = "(žádné uložené mapy)";
+    savedSelect.appendChild(opt);
+    return;
+  }
+
+  for (const n of names) {
+    const opt = document.createElement("option");
+    opt.value = n;
+    opt.textContent = n;
+    savedSelect.appendChild(opt);
+  }
+}
+
+function saveCurrent() {
+  if (!currentMapName) {
+    alert("Nemáš název mapy");
+    return;
+  }
+
+  const maps = getAllMaps();
+  maps[currentMapName] = { name: currentMapName, size: SIZE, data: mapData };
+  setAllMaps(maps);
+
+  alert("Uloženo!");
+}
+
+function loadSelected() {
+  const name = savedSelect.value;
+  if (!name) return;
+
+  const maps = getAllMaps();
+  const item = maps[name];
+  if (!item) return;
+
+  currentMapName = item.name;
+  mapData = item.data;
+  showEditor();
+}
+
+function deleteSelected() {
+  const name = savedSelect.value;
+  if (!name) return;
+  if (!confirm(`Smazat mapu '${name}'?`)) return;
+
+  const maps = getAllMaps();
+  delete maps[name];
+  setAllMaps(maps);
+  refreshSavedSelect();
+}
+
+function exportSelected() {
+  const name = savedSelect.value;
+  if (!name) return alert("Vyber mapu v menu.");
+
+  const maps = getAllMaps();
+  ioArea.value = JSON.stringify(maps[name], null, 2);
+}
+
+function importFromTextarea() {
+  const text = ioArea.value.trim();
+  if (!text) return alert("Vlož JSON do textarea");
+
+  try {
+    const obj = JSON.parse(text);
+
+    if (!obj.name || !obj.data) {
+      alert("JSON nevypadá jako export mapy");
+      return;
+    }
+
+    const maps = getAllMaps();
+    maps[obj.name] = obj;
+    setAllMaps(maps);
+
+    alert("Import hotový");
+    refreshSavedSelect();
+  } catch {
+    alert("Špatný JSON");
+  }
 }
